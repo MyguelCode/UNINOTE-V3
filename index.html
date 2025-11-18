@@ -150,6 +150,8 @@
         <button data-tab="objects" title="Objetos">💡</button>
         <button data-tab="symbols" title="Símbolos">❤️</button>
     </div>
+    <!-- Botón para quitar icono - SIEMPRE VISIBLE -->
+    <button id="remove-icon-btn" style="width: 100%; padding: 10px; background: #e53935; color: white; border: none; cursor: pointer; font-size: 14px; font-weight: 600; border-top: 1px solid #333;">❌ Quitar Icono</button>
     <div class="picker-panels">
         <div class="picker-panel active" id="panel-common"></div>
         <div class="picker-panel" id="panel-recents"></div>
@@ -162,9 +164,8 @@
     </div>
   </div>
 
-  <!-- Context Menu -->
-  <div id="context-menu" class="picker">
-      <button id="remove-icon-btn">❌ Quitar Icono</button>
+  <!-- Context Menu (obsoleto, mantenido por compatibilidad) -->
+  <div id="context-menu" class="picker" style="display: none;">
   </div>
 
   <!-- Lock Menu -->
