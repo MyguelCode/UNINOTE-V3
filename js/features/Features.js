@@ -15,6 +15,26 @@ export class Features {
   static populateEmojiPicker() {
     const commonPanel = document.getElementById('panel-common');
     commonPanel.innerHTML = '';
+
+    // Agregar botón "Quitar Icono" al inicio del panel común
+    const removeBtn = document.createElement('button');
+    removeBtn.id = 'remove-icon-btn-panel';
+    removeBtn.textContent = '❌ Quitar Icono';
+    removeBtn.style.cssText = 'width: 100%; grid-column: 1 / -1; padding: 8px; background: var(--danger-color, #e53935); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin-bottom: 8px;';
+    removeBtn.onclick = () => {
+      if (STATE.activeNoteForMenu) {
+        const noteId = STATE.activeNoteForMenu.dataset.id;
+        const { note: noteData } = NoteController.findNoteData(STATE.currentNotesData, noteId) || {};
+        if (noteData) {
+          delete noteData.icon;
+          STATE.activeNoteForMenu.querySelector('.note-icon').textContent = '';
+          document.getElementById('icon-picker').style.display = 'none';
+          StateController.runUpdates();
+        }
+      }
+    };
+    commonPanel.appendChild(removeBtn);
+
     COMMON_EMOJIS.forEach(emoji => {
       const btn = document.createElement('button');
       btn.textContent = emoji;
