@@ -355,6 +355,7 @@ export function initializeUIEvents() {
     if (iconPicker && iconPicker.style.display === 'block') {
       if (!e.target.closest('#icon-picker') && !e.target.closest('[data-action="emoji-picker"]') && !e.target.closest('.note-icon')) {
         iconPicker.style.display = 'none';
+        STATE.activeNoteForMenu = null; // Limpiar referencia a la nota activa
       }
     }
 

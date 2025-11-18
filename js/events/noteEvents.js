@@ -153,6 +153,7 @@ export function initializeNoteEvents() {
         delete noteData.icon;
         STATE.activeNoteForMenu.querySelector('.note-icon').textContent = '';
         iconPicker.style.display = 'none';
+        STATE.activeNoteForMenu = null; // Limpiar referencia
         StateController.runUpdates();
       }
     }
@@ -365,6 +366,11 @@ async function handleNoteAction(e, action, noteLi, noteData, parentArray, index,
       if (emojiLeftPos < 0) emojiLeftPos = 5;
       iconPicker.style.left = `${emojiLeftPos + emojiScrollLeft}px`;
       STATE.activeNoteForMenu = noteLi;
+
+      // Mostrar u ocultar botón "Quitar Icono" según si la nota tiene icono
+      const hasIcon = noteData && noteData.icon;
+      removeIconBtn.style.display = hasIcon ? 'block' : 'none';
+
       document.querySelector('.picker-tabs button[data-tab="common"]').click();
       break;
 
