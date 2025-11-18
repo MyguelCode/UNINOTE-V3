@@ -143,23 +143,6 @@ export function initializeNoteEvents() {
     await handleNoteAction(e, action, noteLi, noteData, parentArray, index, target);
   });
 
-  // Context menu (right-click) on notes
-  notesList.addEventListener('contextmenu', e => {
-    const targetElement = e.target.closest('.note-container');
-    if (targetElement && !targetElement.closest('.note.is-locked')) {
-      e.preventDefault();
-      STATE.activeNoteForMenu = targetElement.closest('.note');
-
-      const rect = targetElement.getBoundingClientRect();
-      iconPicker.style.display = 'block';
-      iconPicker.style.top = `${rect.bottom + window.scrollY + 5}px`;
-      let menuLeftPos = rect.left - iconPicker.offsetWidth + rect.width;
-      if (menuLeftPos < 0) menuLeftPos = 5;
-      iconPicker.style.left = `${menuLeftPos + window.scrollX}px`;
-
-      document.querySelector('.picker-tabs button[data-tab="common"]').click();
-    }
-  });
 
   // Remove icon button
   removeIconBtn.addEventListener('click', () => {
