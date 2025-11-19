@@ -11,6 +11,7 @@ export function initDOMReferences() {
     searchInput: document.getElementById('search-input'),
     searchAllToggle: document.getElementById('search-all-toggle'),
     globalSearchResults: document.getElementById('global-search-results'),
+    searchResultsCounter: document.getElementById('search-results-counter'),
     addMainNoteBtn: document.getElementById('add-main-note-btn'),
     relockDocBtn: document.getElementById('relock-doc-btn'),
     notesCounter: document.getElementById('notes-counter'),

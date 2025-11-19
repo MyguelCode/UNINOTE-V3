@@ -11,11 +11,25 @@ export class SearchService {
    */
   static performLocalSearch(searchTerm) {
     const notesList = STATE.DOM.notesList;
+    const searchResultsCounter = STATE.DOM.searchResultsCounter;
+
+    // Limpiar búsqueda anterior
+    this.clearSearchHighlights();
     notesList.querySelectorAll('.note').forEach(n => n.classList.remove('is-filtered'));
-    if (!searchTerm) return;
+
+    if (!searchTerm) {
+      searchResultsCounter.style.display = 'none';
+      return;
+    }
 
     const notesToShow = new Set();
+    const notesWithMatches = new Set(); // Solo notas que realmente contienen el término
     const searchLower = searchTerm.toLowerCase();
+    let totalMatches = 0;
+    let firstMatchNote = null;
+
+    // Crear regex para resaltado (escapar caracteres especiales)
+    const regex = new RegExp(`(${searchTerm.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
 
     const recursiveSearch = (list) => {
       list.querySelectorAll(':scope > .note').forEach(note => {
@@ -23,15 +37,43 @@ export class SearchService {
 
         let noteText;
         const isNoteLocked = note.dataset.lockType && !STATE.sessionUnlockedNotes.has(note.dataset.id);
+        const editableDiv = note.querySelector('.editable-note');
 
         if (isNoteLocked) {
           noteText = (note.dataset.lockHint || '').toLowerCase();
         } else {
-          noteText = note.querySelector('.editable-note').textContent.toLowerCase();
+          noteText = editableDiv ? editableDiv.textContent.toLowerCase() : '';
         }
 
         if (noteText.includes(searchLower)) {
           notesToShow.add(note);
+          notesWithMatches.add(note);
+
+          // Resaltar coincidencias en el contenido
+          if (!isNoteLocked && editableDiv) {
+            const originalHTML = editableDiv.innerHTML;
+            const textContent = editableDiv.textContent;
+
+            // Contar coincidencias en esta nota
+            const matches = textContent.match(regex);
+            if (matches) {
+              totalMatches += matches.length;
+
+              // Guardar el primer match para scroll
+              if (!firstMatchNote) {
+                firstMatchNote = note;
+              }
+
+              // Aplicar resaltado
+              // Para evitar problemas con HTML existente, trabajamos solo con texto plano
+              const tempDiv = document.createElement('div');
+              tempDiv.textContent = textContent;
+              const plainText = tempDiv.textContent;
+              const highlightedText = plainText.replace(regex, '<mark class="search-highlight">$1</mark>');
+              editableDiv.innerHTML = highlightedText;
+            }
+          }
+
           // Agregar todos los padres
           let parent = note.parentElement.closest('.note');
           while (parent) {
@@ -41,17 +83,48 @@ export class SearchService {
         }
 
         const sublist = note.querySelector('.subnotes');
-        if (sublist && recursiveSearch(sublist)) {
-          notesToShow.add(note);
+        if (sublist) {
+          recursiveSearch(sublist);
         }
       });
     };
 
     recursiveSearch(notesList);
 
+    // Filtrar notas
     notesList.querySelectorAll('.note').forEach(note => {
       if (note.dataset.isArchived === 'true') return;
       note.classList.toggle('is-filtered', !notesToShow.has(note));
+    });
+
+    // Mostrar contador de resultados
+    if (notesWithMatches.size > 0) {
+      searchResultsCounter.textContent = `🔍 ${totalMatches} coincidencia${totalMatches !== 1 ? 's' : ''} en ${notesWithMatches.size} nota${notesWithMatches.size !== 1 ? 's' : ''}`;
+      searchResultsCounter.style.display = 'block';
+
+      // Scroll automático al primer resultado
+      if (firstMatchNote) {
+        setTimeout(() => {
+          firstMatchNote.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          firstMatchNote.classList.add('highlight');
+          setTimeout(() => firstMatchNote.classList.remove('highlight'), 2000);
+        }, 100);
+      }
+    } else {
+      searchResultsCounter.textContent = '🔍 No se encontraron resultados';
+      searchResultsCounter.style.display = 'block';
+    }
+  }
+
+  /**
+   * Limpiar resaltados de búsqueda
+   */
+  static clearSearchHighlights() {
+    const notesList = STATE.DOM.notesList;
+    notesList.querySelectorAll('.search-highlight').forEach(mark => {
+      const parent = mark.parentNode;
+      parent.replaceChild(document.createTextNode(mark.textContent), mark);
+      parent.normalize(); // Combinar nodos de texto adyacentes
     });
   }
 
@@ -116,15 +189,19 @@ export class SearchService {
    */
   static renderGlobalResults(results, searchTerm) {
     const globalSearchResults = STATE.DOM.globalSearchResults;
+    const searchResultsCounter = STATE.DOM.searchResultsCounter;
     globalSearchResults.innerHTML = '';
 
     if (results.length === 0) {
       globalSearchResults.innerHTML = '<li class="search-no-results">No se encontraron resultados.</li>';
+      searchResultsCounter.textContent = '🔍 No se encontraron resultados';
+      searchResultsCounter.style.display = 'block';
       return;
     }
 
     const regex = new RegExp(`(${searchTerm.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
     const tempDiv = document.createElement('div');
+    let totalMatches = 0;
 
     results.forEach(result => {
       const li = document.createElement('li');
@@ -133,6 +210,13 @@ export class SearchService {
       li.dataset.noteId = result.note.id;
       tempDiv.innerHTML = result.note.content;
       let plainText = tempDiv.textContent || tempDiv.innerText || "";
+
+      // Contar coincidencias
+      const matches = plainText.match(regex);
+      if (matches) {
+        totalMatches += matches.length;
+      }
+
       let highlightedText = plainText.replace(regex, '<mark>$1</mark>');
       li.innerHTML = `
         <p class="result-content">${highlightedText}</p>
@@ -140,6 +224,10 @@ export class SearchService {
       `;
       globalSearchResults.appendChild(li);
     });
+
+    // Mostrar contador de resultados globales
+    searchResultsCounter.textContent = `🔍 ${totalMatches} coincidencia${totalMatches !== 1 ? 's' : ''} en ${results.length} nota${results.length !== 1 ? 's' : ''} (búsqueda global)`;
+    searchResultsCounter.style.display = 'block';
   }
 
   /**
@@ -147,5 +235,6 @@ export class SearchService {
    */
   static hideGlobalSearchResults() {
     STATE.DOM.globalSearchResults.classList.add('hidden');
+    STATE.DOM.searchResultsCounter.style.display = 'none';
   }
 }

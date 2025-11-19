@@ -1,5 +1,14 @@
 /* === BÚSQUEDA - UNINOTE === */
 
+/* Resaltado de búsqueda local */
+.search-highlight {
+    background-color: #fbbf24;
+    color: #000;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
 #global-search-results {
     list-style: none;
     padding: 0;
