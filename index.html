@@ -71,10 +71,16 @@
         <ul id="document-menu" class="hidden"></ul>
     </div>
     <div class="search-container">
-        <input type="search" id="search-input" placeholder="Buscar en este Uninote...">
-        <div class="global-search-toggle">
-            <input type="checkbox" id="search-all-toggle">
-            <label for="search-all-toggle">Buscar en todos</label>
+        <input type="search" id="search-input" placeholder="Buscar..." style="max-width: 280px;">
+        <div class="search-options">
+            <div class="global-search-toggle">
+                <input type="checkbox" id="search-all-toggle">
+                <label for="search-all-toggle">Buscar en todos</label>
+            </div>
+            <div class="search-mode-toggle">
+                <input type="checkbox" id="search-mode-toggle">
+                <label for="search-mode-toggle" title="Activado: busca cualquier palabra | Desactivado: busca frase exacta">Cualquier palabra</label>
+            </div>
         </div>
         <div id="notes-counter">Principales: 0 / Total: 0</div>
         <div id="search-results-counter" style="display: none; color: var(--primary-light-color); font-weight: 600; margin-top: 5px;"></div>

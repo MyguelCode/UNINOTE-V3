@@ -10,6 +10,7 @@ export function initDOMReferences() {
     tabsContainer: document.getElementById('tabs-container'),
     searchInput: document.getElementById('search-input'),
     searchAllToggle: document.getElementById('search-all-toggle'),
+    searchModeToggle: document.getElementById('search-mode-toggle'),
     globalSearchResults: document.getElementById('global-search-results'),
     searchResultsCounter: document.getElementById('search-results-counter'),
     addMainNoteBtn: document.getElementById('add-main-note-btn'),

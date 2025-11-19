@@ -12,6 +12,7 @@ export class SearchService {
   static performLocalSearch(searchTerm) {
     const notesList = STATE.DOM.notesList;
     const searchResultsCounter = STATE.DOM.searchResultsCounter;
+    const searchModeToggle = STATE.DOM.searchModeToggle;
 
     // Limpiar búsqueda anterior
     this.clearSearchHighlights();
@@ -24,12 +25,27 @@ export class SearchService {
 
     const notesToShow = new Set();
     const notesWithMatches = new Set(); // Solo notas que realmente contienen el término
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = searchTerm.toLowerCase().trim();
     let totalMatches = 0;
     let firstMatchNote = null;
 
-    // Crear regex para resaltado (escapar caracteres especiales)
-    const regex = new RegExp(`(${searchTerm.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
+    // Determinar modo de búsqueda
+    const searchAnyWord = searchModeToggle && searchModeToggle.checked;
+
+    // Crear regex para resaltado
+    let regex;
+    let searchWords = [];
+
+    if (searchAnyWord) {
+      // Modo: Cualquier palabra (buscar cada palabra por separado)
+      searchWords = searchTerm.split(/\s+/).filter(w => w.length > 0);
+      // Crear regex que busque cualquiera de las palabras
+      const escapedWords = searchWords.map(w => w.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'));
+      regex = new RegExp(`(${escapedWords.join('|')})`, 'gi');
+    } else {
+      // Modo: Frase exacta (buscar la frase completa)
+      regex = new RegExp(`(${searchTerm.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
+    }
 
     const recursiveSearch = (list) => {
       list.querySelectorAll(':scope > .note').forEach(note => {
@@ -45,7 +61,17 @@ export class SearchService {
           noteText = editableDiv ? editableDiv.textContent.toLowerCase() : '';
         }
 
-        if (noteText.includes(searchLower)) {
+        // Verificar si la nota coincide con el criterio de búsqueda
+        let matches = false;
+        if (searchAnyWord) {
+          // Modo: Cualquier palabra - buscar si contiene al menos una palabra
+          matches = searchWords.some(word => noteText.includes(word.toLowerCase()));
+        } else {
+          // Modo: Frase exacta - buscar la frase completa
+          matches = noteText.includes(searchLower);
+        }
+
+        if (matches) {
           notesToShow.add(note);
           notesWithMatches.add(note);
 

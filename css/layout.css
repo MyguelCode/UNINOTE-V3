@@ -96,16 +96,26 @@ header {
     outline: none;
 }
 
-.global-search-toggle {
+.search-options {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.global-search-toggle,
+.search-mode-toggle {
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     white-space: nowrap;
 }
 
-.global-search-toggle label {
+.global-search-toggle label,
+.search-mode-toggle label {
     cursor: pointer;
+    user-select: none;
 }
 
 #notes-counter {

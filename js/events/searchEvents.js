@@ -8,11 +8,13 @@ import { SearchService } from '../services/SearchService.js';
 export function initializeSearchEvents() {
   const searchInput = document.getElementById('search-input');
   const searchAllToggle = document.getElementById('search-all-toggle');
+  const searchModeToggle = document.getElementById('search-mode-toggle');
   const globalSearchResults = document.getElementById('global-search-results');
 
   // Search input handler
   searchInput.addEventListener('input', handleSearch);
   searchAllToggle.addEventListener('change', handleSearch);
+  searchModeToggle.addEventListener('change', handleSearch);
 
   // Global search results click handler
   globalSearchResults.addEventListener('click', async (e) => {
