@@ -84,6 +84,11 @@ export class NoteRenderer {
         return `<button data-action="${action}" title="Estado: Sin Hacer">⚪</button>`;
       } else if (btn.id === 'agregarSubNota') {
         return `<button data-action="${action}" title="${title}"><sub>➕</sub></button>`;
+      } else if (btn.id === 'fijar') {
+        // Actualizar label según si la nota está fijada o no
+        const isPinned = noteData && noteData.isPinned;
+        const pinLabel = isPinned ? 'Desfijar Nota' : 'Fijar Nota';
+        return `<button data-action="${action}" title="${pinLabel}">${btn.icon}</button>`;
       } else {
         return `<button data-action="${action}" title="${title}">${btn.icon}</button>`;
       }

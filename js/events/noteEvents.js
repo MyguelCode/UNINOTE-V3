@@ -118,9 +118,9 @@ export function initializeNoteEvents() {
       overflowMenu.style.display = 'none';
       overflowMenu.classList.remove('icon-grid'); // ⚡ Remover clase para que CSS display:grid !important no interfiera
 
-      // ⚡ IMPORTANTE: No limpiar activeNoteForMenu si la acción fue emoji-picker
-      // porque el emoji picker necesita que persista para aplicar el emoji seleccionado
-      if (button.dataset.action !== 'emoji-picker') {
+      // ⚡ IMPORTANTE: No limpiar activeNoteForMenu si la acción fue emoji-picker o choose-status
+      // porque estos menús necesitan que persista para aplicar el emoji/estado seleccionado
+      if (button.dataset.action !== 'emoji-picker' && button.dataset.action !== 'choose-status') {
         STATE.activeNoteForMenu = null;
       }
       console.log('🔵 FINALLY: Overflow menu cerrado, activeNoteForMenu =', STATE.activeNoteForMenu?.dataset?.id || 'null');
@@ -505,15 +505,11 @@ async function handleNoteAction(e, action, noteLi, noteData, parentArray, index,
             buttonLabel = 'Establecer fecha';
           }
         } else if (btn.id === 'fijar') {
-          // Verificar si la nota está fijada
+          // Siempre usar 📍 (mismo icono que el botón visible)
+          // Solo cambiar el label según si está fijada o no
           const isPinned = noteData && noteData.isPinned;
-          if (isPinned) {
-            buttonIcon = '📌';
-            buttonLabel = 'Desfijar Nota';
-          } else {
-            buttonIcon = '📍';
-            buttonLabel = 'Fijar Nota';
-          }
+          buttonIcon = '📍';
+          buttonLabel = isPinned ? 'Desfijar Nota' : 'Fijar Nota';
         }
 
         // Generar contenido con o sin texto
