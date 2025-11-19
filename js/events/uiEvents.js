@@ -10,6 +10,7 @@ import { Features } from '../features/Features.js';
 
 export function initializeUIEvents() {
   const toggleAllBtn = document.getElementById('toggle-all-btn');
+  const selectAllBtn = document.getElementById('select-all-btn');
   const deselectAllBtn = document.getElementById('deselect-all-btn');
   const deleteSelectedBtn = document.getElementById('delete-selected-btn');
   const indentSelectedBtn = document.getElementById('indent-selected-btn');
@@ -41,6 +42,24 @@ export function initializeUIEvents() {
     });
     toggleAllBtn.textContent = isCollapsed ? 'Expandir Todo' : 'Contraer Todo';
     StateController.runUpdates();
+  });
+
+  // Select all visible notes
+  selectAllBtn.addEventListener('click', () => {
+    // Obtener todas las notas visibles (no archivadas)
+    const allVisibleNotes = document.querySelectorAll('.note:not([data-is-archived="true"])');
+
+    allVisibleNotes.forEach(note => {
+      if (!note.classList.contains('selected')) {
+        note.classList.add('selected');
+        const checkbox = note.querySelector('.note-selector');
+        if (checkbox) checkbox.checked = true;
+        STATE.selectedNotes.add(note);
+      }
+    });
+
+    Features.updateBulkActionsBar();
+    window.NotificationService.showNotification(`${allVisibleNotes.length} notas seleccionadas`, 'success');
   });
 
   // Deselect all notes

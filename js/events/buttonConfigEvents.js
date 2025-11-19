@@ -211,6 +211,9 @@ function renderButtonConfigUI() {
   // Render button lists
   renderButtonList('left', config.leftButtons || []);
   renderButtonList('right', config.rightButtons || []);
+
+  // Update button counters
+  updateButtonCounters();
 }
 
 /**
@@ -324,6 +327,24 @@ function renderButtonList(column, buttonIds) {
   // Add drop zones for empty containers
   container.addEventListener('dragover', handleContainerDragOver);
   container.addEventListener('drop', handleContainerDrop);
+}
+
+/**
+ * Update button counters (Total, Left, Right)
+ */
+function updateButtonCounters() {
+  const config = ButtonConfigService.getConfig();
+  const leftCount = config.leftButtons.length;
+  const rightCount = config.rightButtons.length;
+  const totalCount = leftCount + rightCount;
+
+  const counterTotal = document.getElementById('counter-total');
+  const counterLeft = document.getElementById('counter-left');
+  const counterRight = document.getElementById('counter-right');
+
+  if (counterTotal) counterTotal.textContent = totalCount;
+  if (counterLeft) counterLeft.textContent = leftCount;
+  if (counterRight) counterRight.textContent = rightCount;
 }
 
 /**

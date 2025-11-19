@@ -245,3 +245,25 @@ body[data-view-mode="archive"] .note-container button[data-action="archive"],
 body:not([data-view-mode="archive"]) .note-container button[data-action="unarchive"] {
     display: none !important;
 }
+
+/* Pin indicator - clickeable para desfijar */
+.pin-indicator {
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s, transform 0.2s;
+    display: inline-flex;
+    align-items: center;
+}
+
+.pin-indicator:hover {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+.pin-indicator:active {
+    transform: scale(0.95);
+}

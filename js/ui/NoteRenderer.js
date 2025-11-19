@@ -107,9 +107,9 @@ export class NoteRenderer {
     // Note icon (fixed)
     parts.push(`<span class="note-icon"></span>`);
 
-    // Pin indicator (if note is pinned)
+    // Pin indicator (if note is pinned) - clickeable para desfijar
     if (noteData.isPinned) {
-      parts.push(`<span class="pin-indicator" title="Nota fijada">📌</span>`);
+      parts.push(`<button class="pin-indicator" data-action="toggle-pin" title="Click para desfijar">📌</button>`);
     }
 
     // Toggle expand/collapse (fixed, before overflow menu)

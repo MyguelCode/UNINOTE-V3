@@ -9,6 +9,13 @@ header {
     margin-bottom: 0;
     gap: 1rem;
     flex-wrap: wrap;
+
+    /* Sticky header - siempre visible al hacer scroll */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: var(--body-bg-color);
+    padding-top: 1rem;
 }
 
 .document-title-container, .transfer-menu-container {
@@ -36,6 +43,12 @@ header {
     margin-bottom: 1.5rem;
     border-bottom: 1px solid var(--border-color);
     flex-wrap: wrap;
+
+    /* Sticky tabs - siempre visible debajo del header */
+    position: sticky;
+    top: 85px; /* Ajustar según altura del header */
+    z-index: 999;
+    background-color: var(--body-bg-color);
 }
 
 .tab-button {

@@ -12,10 +12,52 @@ export function initializeNoteEvents() {
   const notesList = document.getElementById('notes-list');
   const iconPicker = document.getElementById('icon-picker');
   const lockMenu = document.getElementById('lock-menu');
+  const statusMenu = document.getElementById('status-menu');
   const overflowMenu = document.getElementById('overflow-menu');
   const datePickerModalOverlay = document.getElementById('date-picker-modal-overlay');
   const dateTimeInput = document.getElementById('date-time-input');
   const removeIconBtn = document.getElementById('remove-icon-btn');
+
+  // Status menu click handler
+  statusMenu.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const button = e.target.closest('button');
+    if (!button || !button.dataset.status) return;
+
+    const selectedStatus = button.dataset.status;
+    const noteLi = STATE.activeNoteForMenu;
+    if (!noteLi) return;
+
+    const noteId = noteLi.dataset.id;
+    const { note: noteData } = NoteController.findNoteData(STATE.currentNotesData, noteId) || {};
+    if (!noteData) return;
+
+    // Actualizar estado
+    noteLi.dataset.status = selectedStatus;
+    noteData.status = selectedStatus;
+
+    // Actualizar icono del botón visible si existe
+    const visibleStatusBtn = noteLi.querySelector('[data-action="cycle-status"]');
+    if (visibleStatusBtn) {
+      const statusIcons = { todo: '⚪', inprogress: '🟡', done: '🟢' };
+      const statusTitles = { todo: 'Estado: Sin Hacer', inprogress: 'Estado: En Progreso', done: 'Estado: Hecho' };
+      visibleStatusBtn.textContent = statusIcons[selectedStatus];
+      visibleStatusBtn.title = statusTitles[selectedStatus];
+    }
+
+    // Verificar estado del padre
+    const parentNote = noteLi.parentElement.closest('.note');
+    NoteController.checkParentStatus(parentNote);
+
+    // Cerrar menús y actualizar
+    statusMenu.style.display = 'none';
+    STATE.activeNoteForMenu = null;
+    StateController.runUpdates();
+    await DocumentController.saveCurrentDocument();
+
+    const statusLabels = { todo: 'Sin Hacer', inprogress: 'En Progreso', done: 'Hecho' };
+    window.NotificationService.showNotification(`Estado cambiado a: ${statusLabels[selectedStatus]}`, 'success');
+  });
 
   // Overflow menu click handler
   overflowMenu.addEventListener('click', async (e) => {
@@ -408,7 +450,9 @@ async function handleNoteAction(e, action, noteLi, noteData, parentArray, index,
       overflowMenu.innerHTML = '';
       allHiddenButtons.forEach(btn => {
         const button = document.createElement('button');
-        button.dataset.action = btn.action;
+
+        // Para el botón de estado en el menú, usar 'choose-status' en lugar de 'cycle-status'
+        button.dataset.action = btn.id === 'estado' ? 'choose-status' : btn.action;
 
         // Determinar icono y contenido según el tipo de botón (misma lógica que botones visibles)
         let buttonIcon = btn.icon;
@@ -457,6 +501,16 @@ async function handleNoteAction(e, action, noteLi, noteData, parentArray, index,
           } else {
             buttonIcon = '📅';
             buttonLabel = 'Establecer fecha';
+          }
+        } else if (btn.id === 'fijar') {
+          // Verificar si la nota está fijada
+          const isPinned = noteData && noteData.isPinned;
+          if (isPinned) {
+            buttonIcon = '📌';
+            buttonLabel = 'Desfijar Nota';
+          } else {
+            buttonIcon = '📍';
+            buttonLabel = 'Fijar Nota';
           }
         }
 
@@ -563,12 +617,11 @@ async function handleNoteAction(e, action, noteLi, noteData, parentArray, index,
     case 'duplicate':
       if (!noteData) return;
 
-      const duplicateChoice = await window.NotificationService.showDuplicateModal();
-      if (!duplicateChoice) return;
-
       let noteDataToDup;
+      const hasChildren = noteData.children && noteData.children.length > 0;
 
-      if (duplicateChoice === 'only') {
+      // Si NO hay subnotas, duplicar directamente sin mostrar modal
+      if (!hasChildren) {
         noteDataToDup = {
           id: crypto.randomUUID(),
           content: noteData.content,
@@ -578,16 +631,32 @@ async function handleNoteAction(e, action, noteLi, noteData, parentArray, index,
           dueDate: noteData.dueDate,
           children: []
         };
-      } else if (duplicateChoice === 'with-children') {
-        noteDataToDup = JSON.parse(JSON.stringify(noteData));
-        const assignNewIds = (note) => {
-          note.id = crypto.randomUUID();
-          note.creationDate = new Date().toISOString();
-          if (note.children) {
-            note.children.forEach(assignNewIds);
-          }
-        };
-        assignNewIds(noteDataToDup);
+      } else {
+        // Si hay subnotas, mostrar modal para elegir
+        const duplicateChoice = await window.NotificationService.showDuplicateModal();
+        if (!duplicateChoice) return;
+
+        if (duplicateChoice === 'only') {
+          noteDataToDup = {
+            id: crypto.randomUUID(),
+            content: noteData.content,
+            status: noteData.status,
+            creationDate: new Date().toISOString(),
+            icon: noteData.icon,
+            dueDate: noteData.dueDate,
+            children: []
+          };
+        } else if (duplicateChoice === 'with-children') {
+          noteDataToDup = JSON.parse(JSON.stringify(noteData));
+          const assignNewIds = (note) => {
+            note.id = crypto.randomUUID();
+            note.creationDate = new Date().toISOString();
+            if (note.children) {
+              note.children.forEach(assignNewIds);
+            }
+          };
+          assignNewIds(noteDataToDup);
+        }
       }
 
       parentArray.splice(index + 1, 0, noteDataToDup);
@@ -617,6 +686,21 @@ async function handleNoteAction(e, action, noteLi, noteData, parentArray, index,
       NoteRenderer.renderNoteState(newLi);
       StateController.runUpdates();
       await DocumentController.saveCurrentDocument();
+      break;
+
+    case 'choose-status':
+      // Abrir menú selector de estado (usado en el menú overflow)
+      e.stopPropagation();
+      const statusMenu = document.getElementById('status-menu');
+      const statusRect = target.getBoundingClientRect();
+      const statusScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const statusScrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+      statusMenu.style.display = 'block';
+      statusMenu.style.top = `${statusRect.bottom + statusScrollTop + 5}px`;
+      let statusLeftPos = statusRect.left - statusMenu.offsetWidth + statusRect.width;
+      if (statusLeftPos < 0) statusLeftPos = 5;
+      statusMenu.style.left = `${statusLeftPos + statusScrollLeft}px`;
+      STATE.activeNoteForMenu = noteLi;
       break;
 
     case 'cycle-status':
@@ -735,7 +819,8 @@ async function handleNoteAction(e, action, noteLi, noteData, parentArray, index,
       break;
 
     // Phase 2 actions (now implemented!)
-    case 'pin': {
+    case 'pin':
+    case 'toggle-pin': {
       // Toggle pin status
       noteData.isPinned = !noteData.isPinned;
 

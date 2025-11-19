@@ -179,6 +179,13 @@
     <button data-action="remove-lock">❌ Quitar Bloqueo</button>
   </div>
 
+  <!-- Status Menu (selector de estado) -->
+  <div id="status-menu" class="picker">
+    <button data-status="todo">⚪ Sin Hacer</button>
+    <button data-status="inprogress">🟡 En Progreso</button>
+    <button data-status="done">🟢 Hecho</button>
+  </div>
+
   <!-- Overflow Menu (botones ocultos) -->
   <div id="overflow-menu" class="picker" style="display: none;">
     <!-- Se rellena dinámicamente con botones ocultos -->
@@ -362,9 +369,18 @@
               <!-- Button Configuration Grid -->
               <div class="form-field">
                   <label>Configuración de Botones</label>
-                  <p style="font-size: 0.9em; color: var(--text-muted, #666); margin-bottom: 10px;">
+                  <p style="font-size: 0.9em; color: var(--text-muted, #666); margin-bottom: 5px;">
                       Arrastra los botones para reordenarlos. Click en 👁️ para mostrar/ocultar.
                   </p>
+
+                  <!-- Contador de botones -->
+                  <div id="button-counter" style="display: flex; gap: 15px; margin-bottom: 15px; font-size: 0.9em; color: var(--text-color); background: var(--selected-bg-color, #f0f0f0); padding: 8px 12px; border-radius: 6px;">
+                      <span><strong>Total:</strong> <span id="counter-total">0</span></span>
+                      <span>|</span>
+                      <span><strong>Izquierda:</strong> <span id="counter-left">0</span></span>
+                      <span>|</span>
+                      <span><strong>Derecha:</strong> <span id="counter-right">0</span></span>
+                  </div>
 
                   <div id="button-config-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                       <!-- Left Column -->
@@ -492,6 +508,7 @@
   <!-- Bulk Actions Bar -->
   <div id="bulk-actions-bar">
     <span id="selection-counter">0 notas seleccionadas</span>
+    <button id="select-all-btn" title="Seleccionar todas las notas visibles">☑️ Seleccionar Todas</button>
     <button id="select-children-btn" title="Seleccionar todas las sub-notas de las notas seleccionadas">👨‍👩‍👧‍👦 Seleccionar Descendientes</button>
     <button id="indent-selected-btn" title="Anidar seleccionadas (Tab)">Anidar →</button>
     <button id="outdent-selected-btn" title="Desanidar seleccionadas (Shift+Tab)">← Desanidar</button>
