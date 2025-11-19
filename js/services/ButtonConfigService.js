@@ -87,7 +87,7 @@ export class ButtonConfigService {
     // Botones nuevos (Phase 2 - AHORA FUNCIONALES!)
     fijar: {
       id: 'fijar',
-      icon: '📌',
+      icon: '📍',
       label: 'Fijar nota',
       action: 'pin',
       functional: true

@@ -14,7 +14,7 @@ header {
     position: sticky;
     top: 0;
     z-index: 1000;
-    background-color: var(--body-bg-color);
+    background-color: var(--bg-color);
     padding-top: 1rem;
 }
 
@@ -48,7 +48,7 @@ header {
     position: sticky;
     top: 85px; /* Ajustar según altura del header */
     z-index: 999;
-    background-color: var(--body-bg-color);
+    background-color: var(--bg-color);
 }
 
 .tab-button {

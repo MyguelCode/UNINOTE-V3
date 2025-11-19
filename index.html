@@ -374,12 +374,12 @@
                   </p>
 
                   <!-- Contador de botones -->
-                  <div id="button-counter" style="display: flex; gap: 15px; margin-bottom: 15px; font-size: 0.9em; color: var(--text-color); background: var(--selected-bg-color, #f0f0f0); padding: 8px 12px; border-radius: 6px;">
+                  <div id="button-counter" style="display: flex; gap: 15px; margin-bottom: 15px; font-size: 0.9em; color: var(--text-color); background: var(--selected-bg-color, #f0f0f0); padding: 8px 12px; border-radius: 6px; flex-wrap: wrap;">
                       <span><strong>Total:</strong> <span id="counter-total">0</span></span>
                       <span>|</span>
-                      <span><strong>Izquierda:</strong> <span id="counter-left">0</span></span>
+                      <span><strong>Izquierda:</strong> <span id="counter-left">0</span> <span style="color: var(--primary-light-color);">Visibles: <span id="counter-left-visible">0</span></span></span>
                       <span>|</span>
-                      <span><strong>Derecha:</strong> <span id="counter-right">0</span></span>
+                      <span><strong>Derecha:</strong> <span id="counter-right">0</span> <span style="color: var(--primary-light-color);">Visibles: <span id="counter-right-visible">0</span></span></span>
                   </div>
 
                   <div id="button-config-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -509,11 +509,11 @@
   <div id="bulk-actions-bar">
     <span id="selection-counter">0 notas seleccionadas</span>
     <button id="select-all-btn" title="Seleccionar todas las notas visibles">☑️ Seleccionar Todas</button>
+    <button id="deselect-all-btn">❌ Deseleccionar Todo</button>
     <button id="select-children-btn" title="Seleccionar todas las sub-notas de las notas seleccionadas">👨‍👩‍👧‍👦 Seleccionar Descendientes</button>
     <button id="indent-selected-btn" title="Anidar seleccionadas (Tab)">Anidar →</button>
     <button id="outdent-selected-btn" title="Desanidar seleccionadas (Shift+Tab)">← Desanidar</button>
     <button id="delete-selected-btn">Eliminar Seleccionadas</button>
-    <button id="deselect-all-btn">Deseleccionar Todo</button>
   </div>
 
   <!-- Scroll Buttons -->

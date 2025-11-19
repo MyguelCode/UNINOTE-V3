@@ -330,7 +330,7 @@ function renderButtonList(column, buttonIds) {
 }
 
 /**
- * Update button counters (Total, Left, Right)
+ * Update button counters (Total, Left, Right, Visibles)
  */
 function updateButtonCounters() {
   const config = ButtonConfigService.getConfig();
@@ -338,13 +338,21 @@ function updateButtonCounters() {
   const rightCount = config.rightButtons.length;
   const totalCount = leftCount + rightCount;
 
+  // Contar visibles
+  const leftVisibleCount = config.leftButtons.filter(btnId => config.visibleButtons.has(btnId)).length;
+  const rightVisibleCount = config.rightButtons.filter(btnId => config.visibleButtons.has(btnId)).length;
+
   const counterTotal = document.getElementById('counter-total');
   const counterLeft = document.getElementById('counter-left');
   const counterRight = document.getElementById('counter-right');
+  const counterLeftVisible = document.getElementById('counter-left-visible');
+  const counterRightVisible = document.getElementById('counter-right-visible');
 
   if (counterTotal) counterTotal.textContent = totalCount;
   if (counterLeft) counterLeft.textContent = leftCount;
   if (counterRight) counterRight.textContent = rightCount;
+  if (counterLeftVisible) counterLeftVisible.textContent = leftVisibleCount;
+  if (counterRightVisible) counterRightVisible.textContent = rightVisibleCount;
 }
 
 /**

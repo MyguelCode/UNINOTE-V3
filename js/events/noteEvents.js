@@ -51,6 +51,8 @@ export function initializeNoteEvents() {
 
     // Cerrar menús y actualizar
     statusMenu.style.display = 'none';
+    overflowMenu.style.display = 'none'; // También cerrar el overflow menu
+    overflowMenu.classList.remove('icon-grid');
     STATE.activeNoteForMenu = null;
     StateController.runUpdates();
     await DocumentController.saveCurrentDocument();
