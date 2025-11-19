@@ -16,6 +16,8 @@ export function initializeUIEvents() {
   const indentSelectedBtn = document.getElementById('indent-selected-btn');
   const outdentSelectedBtn = document.getElementById('outdent-selected-btn');
   const selectChildrenBtn = document.getElementById('select-children-btn');
+  const moveToTopBtn = document.getElementById('move-to-top-btn');
+  const copyToTopBtn = document.getElementById('copy-to-top-btn');
   const scrollTopBtn = document.getElementById('scroll-top-btn');
   const scrollBottomBtn = document.getElementById('scroll-bottom-btn');
   const themeToggleBtn = document.getElementById('theme-toggle-btn');
@@ -165,6 +167,18 @@ export function initializeUIEvents() {
     });
 
     Features.updateBulkActionsBar();
+  });
+
+  // Move selected notes to top
+  moveToTopBtn.addEventListener('click', async () => {
+    if (STATE.selectedNotes.size === 0) return;
+    await moveOrCopyNotesToTop('move');
+  });
+
+  // Copy selected notes to top
+  copyToTopBtn.addEventListener('click', async () => {
+    if (STATE.selectedNotes.size === 0) return;
+    await moveOrCopyNotesToTop('copy');
   });
 
   // Scroll to top
@@ -387,7 +401,8 @@ export function initializeUIEvents() {
         'notification-center-overlay',
         'app-settings-modal-overlay',
         'date-picker-modal-overlay',
-        'duplicate-modal-overlay'
+        'duplicate-modal-overlay',
+        'move-copy-modal-overlay'
       ];
 
       if (closableModals.includes(modalOverlay.id)) {
@@ -395,4 +410,148 @@ export function initializeUIEvents() {
       }
     }
   });
+}
+
+/**
+ * Deep clone de una nota con todas sus propiedades y subnotas
+ * @param {Object} noteData - Data de la nota a clonar
+ * @param {boolean} includePinned - Si se debe mantener isPinned (default: false)
+ * @returns {Object} - Nota clonada con nuevos IDs
+ */
+function deepCloneNote(noteData, includePinned = false) {
+  const cloned = JSON.parse(JSON.stringify(noteData));
+
+  // Asignar nuevos IDs recursivamente
+  const assignNewIds = (note) => {
+    note.id = crypto.randomUUID();
+    note.creationDate = new Date().toISOString();
+
+    // No copiar el estado de fijado (a menos que se especifique)
+    if (!includePinned && note.isPinned) {
+      delete note.isPinned;
+    }
+
+    if (note.children && note.children.length > 0) {
+      note.children.forEach(assignNewIds);
+    }
+  };
+
+  assignNewIds(cloned);
+  return cloned;
+}
+
+/**
+ * Mover o copiar notas seleccionadas al inicio del documento
+ * @param {string} action - 'move' o 'copy'
+ */
+async function moveOrCopyNotesToTop(action) {
+  const notificationService = window.NotificationService;
+  const documentController = window.DocumentController;
+  const noteController = window.NoteController;
+  const noteRenderer = window.NoteRenderer;
+
+  if (STATE.selectedNotes.size === 0) {
+    notificationService.showNotification('No hay notas seleccionadas', 'error');
+    return;
+  }
+
+  // Obtener las notas seleccionadas ordenadas
+  const selectedNotesArray = Array.from(STATE.selectedNotes);
+  const notesToProcess = [];
+
+  // Para cada nota seleccionada, obtener su noteData
+  for (const noteLi of selectedNotesArray) {
+    const noteId = noteLi.dataset.id;
+    const { note: noteData, parentArray, index } = noteController.findNoteData(STATE.currentNotesData, noteId) || {};
+
+    if (!noteData) continue;
+
+    // Verificar si tiene subnotas
+    const hasChildren = noteData.children && noteData.children.length > 0;
+
+    notesToProcess.push({
+      noteLi,
+      noteData,
+      parentArray,
+      index,
+      hasChildren
+    });
+  }
+
+  if (notesToProcess.length === 0) {
+    notificationService.showNotification('No se encontraron notas válidas', 'error');
+    return;
+  }
+
+  // Procesar cada nota
+  for (const { noteLi, noteData, parentArray, index, hasChildren } of notesToProcess) {
+    let includeChildren = true; // Por defecto incluir subnotas
+
+    // Si tiene subnotas, preguntar al usuario
+    if (hasChildren) {
+      const choice = await notificationService.showMoveCopyModal(action);
+      if (!choice) {
+        // Usuario canceló
+        continue;
+      }
+      includeChildren = choice === 'with-children';
+    }
+
+    let noteToAdd;
+
+    if (action === 'copy') {
+      // COPIAR: Deep clone de la nota
+      if (includeChildren) {
+        noteToAdd = deepCloneNote(noteData, false);
+      } else {
+        // Solo copiar la nota sin subnotas
+        noteToAdd = deepCloneNote(noteData, false);
+        noteToAdd.children = [];
+      }
+    } else {
+      // MOVER: Usar la nota original
+      if (includeChildren) {
+        noteToAdd = noteData;
+      } else {
+        // Mover solo la nota sin subnotas
+        noteToAdd = JSON.parse(JSON.stringify(noteData));
+        noteToAdd.children = [];
+      }
+
+      // Eliminar del array original
+      if (parentArray) {
+        parentArray.splice(index, 1);
+      }
+    }
+
+    // Agregar al inicio de STATE.currentNotesData
+    STATE.currentNotesData.unshift(noteToAdd);
+  }
+
+  // Limpiar selección
+  STATE.selectedNotes.forEach(note => {
+    note.classList.remove('selected');
+    const checkbox = note.querySelector('.note-selector');
+    if (checkbox) checkbox.checked = false;
+  });
+  STATE.selectedNotes.clear();
+
+  // Re-renderizar la UI
+  if (noteRenderer && noteRenderer.renderAppUI) {
+    noteRenderer.renderAppUI();
+  } else {
+    window.NoteRenderer.renderAppUI();
+  }
+
+  // Actualizar y guardar
+  StateController.runUpdates();
+  await documentController.saveCurrentDocument();
+
+  const actionText = action === 'copy' ? 'copiada(s)' : 'movida(s)';
+  notificationService.showNotification(`${notesToProcess.length} nota(s) ${actionText} al inicio`, 'success');
+
+  // Actualizar barra de acciones
+  if (window.Features && window.Features.updateBulkActionsBar) {
+    window.Features.updateBulkActionsBar();
+  }
 }

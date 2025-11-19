@@ -916,6 +916,52 @@ async function handleNoteAction(e, action, noteLi, noteData, parentArray, index,
       DocumentController.saveCurrentDocument();
       break;
     }
+
+    case 'copy-to-top': {
+      // Copiar nota al inicio del documento
+      if (!noteData) return;
+
+      const hasChildren = noteData.children && noteData.children.length > 0;
+      let includeChildren = true;
+
+      // Si tiene subnotas, preguntar
+      if (hasChildren) {
+        const choice = await window.NotificationService.showMoveCopyModal('copy');
+        if (!choice) return;
+        includeChildren = choice === 'with-children';
+      }
+
+      // Deep clone de la nota
+      const cloned = JSON.parse(JSON.stringify(noteData));
+
+      // Asignar nuevos IDs recursivamente
+      const assignNewIds = (note) => {
+        note.id = crypto.randomUUID();
+        note.creationDate = new Date().toISOString();
+        // No copiar el estado de fijado
+        if (note.isPinned) delete note.isPinned;
+        if (note.children && note.children.length > 0) {
+          note.children.forEach(assignNewIds);
+        }
+      };
+
+      assignNewIds(cloned);
+
+      // Si no quiere subnotas, eliminarlas de la copia
+      if (!includeChildren) {
+        cloned.children = [];
+      }
+
+      // Agregar al inicio de STATE.currentNotesData
+      STATE.currentNotesData.unshift(cloned);
+
+      // Re-renderizar
+      NoteRenderer.renderAppUI();
+
+      window.NotificationService.showNotification('Nota copiada al inicio', 'success');
+      DocumentController.saveCurrentDocument();
+      break;
+    }
   }
 }
 

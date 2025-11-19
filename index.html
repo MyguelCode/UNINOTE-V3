@@ -284,6 +284,19 @@
     </div>
   </div>
 
+  <!-- Modal para mover/copiar al inicio con subnotas -->
+  <div id="move-copy-modal-overlay" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h2 id="move-copy-modal-title">Mover al Inicio</h2>
+        <p id="move-copy-modal-message">¿Cómo deseas mover esta nota?</p>
+        <div class="modal-actions" style="flex-direction: column; align-items: stretch;">
+            <button id="move-copy-only-note-btn" class="modal-button confirm-action">📝 Solo esta nota</button>
+            <button id="move-copy-with-children-btn" class="modal-button">📋 Con todas sus sub-notas</button>
+            <button id="move-copy-cancel-btn" class="modal-button cancel-action">Cancelar</button>
+        </div>
+    </div>
+  </div>
+
   <div id="date-picker-modal-overlay" class="modal-overlay hidden">
     <div class="modal-box">
         <h2>Establecer Fecha Límite</h2>
@@ -518,6 +531,8 @@
     <button id="select-all-btn" title="Seleccionar todas las notas visibles">☑️ Seleccionar Todas</button>
     <button id="deselect-all-btn">❌ Deseleccionar Todo</button>
     <button id="select-children-btn" title="Seleccionar todas las sub-notas de las notas seleccionadas">👨‍👩‍👧‍👦 Seleccionar Descendientes</button>
+    <button id="move-to-top-btn" title="Mover notas seleccionadas al inicio">⬆️ Mover al Inicio</button>
+    <button id="copy-to-top-btn" title="Copiar notas seleccionadas al inicio">📋 Copiar al Inicio</button>
     <button id="indent-selected-btn" title="Anidar seleccionadas (Tab)">Anidar →</button>
     <button id="outdent-selected-btn" title="Desanidar seleccionadas (Shift+Tab)">← Desanidar</button>
     <button id="delete-selected-btn">Eliminar Seleccionadas</button>

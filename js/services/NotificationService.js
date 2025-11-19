@@ -134,6 +134,52 @@ export class NotificationService {
   }
 
   /**
+   * Mostrar modal para mover/copiar al inicio con o sin subnotas
+   * @param {string} action - 'move' o 'copy'
+   */
+  static showMoveCopyModal(action = 'move') {
+    return new Promise(resolve => {
+      const overlay = document.getElementById('move-copy-modal-overlay');
+      const title = document.getElementById('move-copy-modal-title');
+      const message = document.getElementById('move-copy-modal-message');
+      const onlyNoteBtn = document.getElementById('move-copy-only-note-btn');
+      const withChildrenBtn = document.getElementById('move-copy-with-children-btn');
+      const cancelBtn = document.getElementById('move-copy-cancel-btn');
+
+      // Configurar texto según la acción
+      if (action === 'copy') {
+        title.textContent = 'Copiar al Inicio';
+        message.textContent = '¿Cómo deseas copiar esta nota?';
+      } else {
+        title.textContent = 'Mover al Inicio';
+        message.textContent = '¿Cómo deseas mover esta nota?';
+      }
+
+      overlay.classList.remove('hidden');
+
+      const cleanup = () => {
+        overlay.classList.add('hidden');
+        onlyNoteBtn.onclick = null;
+        withChildrenBtn.onclick = null;
+        cancelBtn.onclick = null;
+        overlay.onclick = null;
+      };
+
+      // Click en overlay (fuera del modal-box) para cancelar
+      overlay.onclick = (e) => {
+        if (e.target === overlay) {
+          cleanup();
+          resolve(null);
+        }
+      };
+
+      onlyNoteBtn.onclick = () => { cleanup(); resolve('only'); };
+      withChildrenBtn.onclick = () => { cleanup(); resolve('with-children'); };
+      cancelBtn.onclick = () => { cleanup(); resolve(null); };
+    });
+  }
+
+  /**
    * Mostrar notificación nativa del navegador
    */
   static showNativeNotification(title, options) {

@@ -119,6 +119,13 @@ export class ButtonConfigService {
       label: 'Promover a principal',
       action: 'promote',
       functional: true
+    },
+    copiarInicio: {
+      id: 'copiarInicio',
+      icon: '📋',
+      label: 'Copiar al inicio',
+      action: 'copy-to-top',
+      functional: true
     }
   };
 

@@ -73,7 +73,8 @@ export class NoteRenderer {
         'moverInicio': 'move-top',
         'moverFinal': 'move-bottom',
         'moverPosicion': 'move-to',
-        'promover': 'promote'
+        'promover': 'promote',
+        'copiarInicio': 'copy-to-top'
       };
 
       const action = actionMap[btn.id];
